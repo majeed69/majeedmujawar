@@ -1,0 +1,1535 @@
+/*
+  styles.css
+  ==========
+  Mobile first. Base rules are for small screens, and media queries add
+  columns as the screen gets wider.
+
+  Contents
+    1. Design tokens and themes
+    2. Base and reset
+    3. Helpers (layout, buttons, handwriting, screen reader text)
+    4. Top bar
+    5. Hero and greeting
+    6. Tooltip
+    7. Sections and headings
+    8. Clocks
+    9. About and skills
+   10. Right now
+   11. Projects
+   12. Education and recruiter questions
+   13. Postcard
+   14. Socials
+   15. Shortcuts menu
+   16. Toast
+   17. No JavaScript fallbacks
+   18. Reduced motion
+*/
+
+/* 1. Design tokens and themes ------------------------------------------- */
+
+:root {
+  --paper: #EEF0EB;
+  --card: #F8F9F6;
+  --ink: #1C1E1B;
+  --soft: #555A52;
+  --rule: #D0D5CB;
+  --mark: #F5C94A;      /* highlighter yellow, a nod to Mumbai’s kaali-peeli taxis */
+  --mark-ink: #1C1E1B;
+  --error: #A6261D;
+  --backdrop: rgba(20, 22, 19, .45);
+
+  --serif: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --sans: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --hand: "Kalam", "Segoe Print", "Bradley Hand", "Comic Neue", cursive;
+  --deva: "Noto Serif Devanagari", "Noto Sans Devanagari", "Kohinoor Devanagari", "Devanagari Sangam MN", "Nirmala UI", "Mangal", "Lohit Devanagari", sans-serif;
+
+  --max: 1080px;
+  --gutter: clamp(16px, 5vw, 56px);
+  --radius: 14px;
+  --bar-h: 64px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141613;
+    --card: #1B1E1A;
+    --ink: #ECEDE6;
+    --soft: #A6AB9F;
+    --rule: #2E322C;
+    --mark: #E2B83A;
+    --mark-ink: #141613;
+    --error: #F2B8B5;
+    --backdrop: rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #141613;
+  --card: #1B1E1A;
+  --ink: #ECEDE6;
+  --soft: #A6AB9F;
+  --rule: #2E322C;
+  --mark: #E2B83A;
+  --mark-ink: #141613;
+  --error: #F2B8B5;
+  --backdrop: rgba(0, 0, 0, .6);
+  color-scheme: dark;
+}
+
+/* 2. Base and reset ----------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--bar-h) + var(--safe-top) + 12px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.6 var(--sans);
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, p, ul, dl, dd {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+svg {
+  overflow: visible;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--mark);
+  color: var(--mark-ink);
+}
+
+main:focus {
+  outline: none;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 1px 6px;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 12px/1.5 var(--mono);
+  text-align: center;
+}
+
+/* 3. Helpers ------------------------------------------------------------ */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-left: max(var(--gutter), var(--safe-left));
+  padding-right: max(var(--gutter), var(--safe-right));
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: calc(var(--safe-top) + 8px);
+  left: max(12px, var(--safe-left));
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 500;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 40px));
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.hand {
+  font-family: var(--hand);
+  font-weight: 400;
+  color: var(--soft);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: 500 15px/1.2 var(--sans);
+  text-align: center;
+  text-decoration: none;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-solid {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-solid:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 4. Top bar ------------------------------------------------------------ */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding-top: var(--safe-top);
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--bar-h);
+}
+
+.brand {
+  flex: none;
+  font: 500 19px/1.2 var(--serif);
+  letter-spacing: -.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 10px 0;
+}
+
+.topnav {
+  display: none;
+  flex: 1;
+  justify-content: center;
+}
+
+.topnav ul {
+  display: flex;
+  gap: 4px;
+}
+
+.topnav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  color: var(--soft);
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: 999px;
+}
+
+.topnav a:hover {
+  color: var(--ink);
+}
+
+.topnav a[aria-current] {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--mark);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.mumbai-now {
+  display: none;
+  color: var(--soft);
+  font-size: 14px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.shortcuts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--soft);
+  font-size: 14px;
+}
+
+.shortcuts-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.shortcuts-word {
+  display: none;
+}
+
+.theme-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.theme-btn:hover {
+  border-color: var(--ink);
+}
+
+.theme-icon {
+  display: none;
+  width: 18px;
+  height: 18px;
+}
+
+.theme-btn[data-mode="auto"] .theme-icon-auto,
+.theme-btn[data-mode="light"] .theme-icon-light,
+.theme-btn[data-mode="dark"] .theme-icon-dark {
+  display: block;
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--mark);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+@media (min-width: 600px) {
+  .mumbai-now {
+    display: block;
+  }
+}
+
+@media (min-width: 720px) {
+  .shortcuts-word {
+    display: inline;
+  }
+
+  .shortcuts-btn {
+    padding: 0 10px 0 14px;
+  }
+
+  .shortcuts-sr {
+    display: none;
+  }
+}
+
+@media (min-width: 860px) {
+  .topnav {
+    display: flex;
+  }
+
+  .topbar-tools {
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 860px) and (max-width: 1023.98px) {
+  .mumbai-now {
+    display: none;
+  }
+}
+
+/* 5. Hero and greeting -------------------------------------------------- */
+
+.hero {
+  padding: clamp(44px, 9vh, 112px) 0 clamp(56px, 9vh, 96px);
+  max-width: 920px;
+}
+
+.hero-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-bottom: 20px;
+}
+
+.hero-id h1 {
+  font: 400 13px/1.5 var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.hero-role {
+  color: var(--soft);
+  font: 400 13px/1.5 var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.hero-role::before {
+  content: "/ ";
+  color: var(--rule);
+}
+
+.greet {
+  position: relative;
+  min-height: calc(var(--greet-lines, 7) * 1.22em);
+  font: 400 clamp(28px, 4.6vw, 54px)/1.22 var(--serif);
+  letter-spacing: -.012em;
+  font-optical-sizing: auto;
+}
+
+.greet-ghost {
+  visibility: hidden;
+}
+
+.greet-typed {
+  position: absolute;
+  inset: 0;
+}
+
+.greet.is-done .greet-typed {
+  position: static;
+}
+
+.caret {
+  display: inline-block;
+  width: .05em;
+  height: .92em;
+  margin-left: .04em;
+  vertical-align: -.1em;
+  background: var(--ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caret {
+    animation: caret-blink 1s steps(1) infinite;
+  }
+}
+
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}
+
+/* A personal fact. The real button is visually hidden but focusable, and the
+   highlighted text next to it is what people see, tap and hover. It gets a
+   yellow highlighter sweep once it has been typed. */
+.fact-group {
+  position: relative;
+}
+
+.fact {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+  background: none;
+}
+
+.fact-text {
+  position: relative;
+  margin: 0 -.02em;
+  padding: 0 .08em;
+  border-radius: 3px;
+  background-image: linear-gradient(var(--mark), var(--mark));
+  background-repeat: no-repeat;
+  background-position: 0 58%;
+  background-size: 0% 86%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-size .5s cubic-bezier(.3, .6, .3, 1), color .5s ease;
+}
+
+/* Makes the tap area at least 44px tall without changing the line height. */
+.fact-text::before {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+}
+
+.fact-group.is-marked .fact-text {
+  background-size: 100% 86%;
+  color: var(--mark-ink);
+}
+
+.fact-group:hover .fact-text,
+.fact[aria-describedby] + .fact-text {
+  text-decoration: underline;
+  text-decoration-thickness: .06em;
+  text-underline-offset: .12em;
+}
+
+.fact:focus-visible + .fact-text {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.ghost-fact {
+  padding: 0 .08em;
+  margin: 0 -.02em;
+}
+
+
+.intro {
+  max-width: 34em;
+  margin-top: 32px;
+  font-size: clamp(19px, 2.1vw, 22px);
+  line-height: 1.5;
+}
+
+.hint {
+  margin-top: 14px;
+}
+
+.hint .hand {
+  display: inline-block;
+  font-size: 19px;
+  transform: rotate(-1.4deg);
+  transform-origin: 0 50%;
+}
+
+.js .intro,
+.js .hint {
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.js .hint {
+  transition-delay: .3s;
+}
+
+.js .intro.is-shown,
+.js .hint.is-shown {
+  opacity: 1;
+}
+
+@media (min-width: 480px) {
+  .greet { --greet-lines: 6; }
+}
+
+@media (min-width: 768px) {
+  .greet { --greet-lines: 5; }
+}
+
+@media (min-width: 1100px) {
+  .greet { --greet-lines: 4; }
+}
+
+/* 6. Tooltip ------------------------------------------------------------ */
+
+.tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: max-content;
+  max-width: min(330px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 400 14px/1.45 var(--sans);
+  pointer-events: none;
+}
+
+.tip-code {
+  display: block;
+  margin-top: 8px;
+  font: 400 12px/1.5 var(--mono);
+  opacity: .85;
+  overflow-wrap: anywhere;
+}
+
+/* 7. Sections and headings ---------------------------------------------- */
+
+.section {
+  padding: clamp(56px, 9vw, 92px) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.section h2 {
+  font: 500 clamp(30px, 4vw, 42px)/1.1 var(--serif);
+  letter-spacing: -.012em;
+  margin-bottom: 8px;
+  text-wrap: balance;
+}
+
+.section h2 + :not(.sub) {
+  margin-top: 24px;
+}
+
+.section h2:focus {
+  outline: none;
+}
+
+.sub {
+  margin-bottom: 32px;
+  color: var(--soft);
+}
+
+/* 8. Clocks ------------------------------------------------------------- */
+
+.clocks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.clock-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.clock {
+  flex: none;
+  width: 92px;
+  height: 92px;
+  color: var(--ink);
+}
+
+.clock-second {
+  stroke: var(--mark);
+}
+
+.clock-pin {
+  fill: var(--mark);
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.clock-text {
+  min-width: 0;
+}
+
+.clock-who {
+  font: 400 23px/1.2 var(--serif);
+}
+
+.clock-digital {
+  margin: 4px 0 8px;
+  color: var(--soft);
+  font: 400 14px/1.4 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-status {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+@media (min-width: 720px) {
+  .clocks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .clock-card {
+    gap: 22px;
+    padding: 24px;
+  }
+
+  .clock {
+    width: 112px;
+    height: 112px;
+  }
+}
+
+/* 9. About and skills --------------------------------------------------- */
+
+.adapt {
+  margin: 8px 0 28px;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.about-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
+}
+
+.about-pair h3 {
+  margin-bottom: 6px;
+  font: 500 22px/1.25 var(--serif);
+}
+
+.about-pair p {
+  max-width: 36em;
+}
+
+.tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 56px;
+}
+
+.tool {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.tool dt {
+  font-weight: 500;
+}
+
+.tool dd {
+  color: var(--soft);
+}
+
+@media (min-width: 480px) {
+  .tool {
+    grid-template-columns: 9.5em minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 760px) {
+  .about-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 48px;
+  }
+
+  .tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tool {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .tool {
+    grid-template-columns: 9.5em minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+/* 10. Right now --------------------------------------------------------- */
+
+.now-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.now-card {
+  padding: 22px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.now-label {
+  margin-bottom: 4px;
+  font-size: 19px;
+}
+
+.now-value {
+  font: 400 24px/1.25 var(--serif);
+}
+
+.now-note {
+  margin-top: 6px;
+  color: var(--soft);
+  font-size: 15px;
+}
+
+@media (min-width: 860px) {
+  /* One equal column per visible card, so two or three cards both fill the row. */
+  .now-grid {
+    grid-template-columns: none;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 24px;
+  }
+}
+
+/* 11. Projects ---------------------------------------------------------- */
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: 24px;
+}
+
+.project {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.project-name {
+  margin-bottom: 6px;
+  font: 500 clamp(26px, 3vw, 30px)/1.15 var(--serif);
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+}
+
+.project-desc {
+  min-height: 3.2em;
+  margin-bottom: 16px;
+  color: var(--soft);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.tags li {
+  padding: 3px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--soft);
+  font: 400 12.5px/1.5 var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.project-live {
+  margin-bottom: 22px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule);
+  font-size: 14px;
+}
+
+.project-live-label {
+  margin-bottom: 12px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.waterfall {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+  font: 400 12.5px/1.4 var(--mono);
+}
+
+.waterfall-track {
+  display: block;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--paper);
+}
+
+.waterfall-bar {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: 3px;
+  background: var(--ink);
+}
+
+.waterfall-ms {
+  color: var(--soft);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+}
+
+.stat-value {
+  display: block;
+  font: 500 26px/1.1 var(--serif);
+}
+
+.stat-label {
+  color: var(--soft);
+  font-size: 13px;
+}
+
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.more {
+  margin-top: 28px;
+}
+
+/* 12. Education and recruiter questions --------------------------------- */
+
+.degree {
+  font: 400 clamp(26px, 3.2vw, 34px)/1.2 var(--serif);
+  letter-spacing: -.01em;
+}
+
+.school {
+  margin-top: 6px;
+  color: var(--soft);
+}
+
+.faq {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 56px;
+}
+
+.qa {
+  padding: 24px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.qa h3 {
+  margin-bottom: 8px;
+  font: 500 clamp(21px, 2.2vw, 23px)/1.25 var(--serif);
+}
+
+.qa p {
+  max-width: 36em;
+}
+
+.qa .btn-row {
+  margin-top: 16px;
+}
+
+.todo {
+  padding: 0 .25em;
+  border-radius: 3px;
+  background: var(--mark);
+  color: var(--mark-ink);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+@media (min-width: 760px) {
+  .faq {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .qa-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* 13. Postcard ---------------------------------------------------------- */
+
+.contact {
+  padding-bottom: calc(clamp(56px, 9vw, 96px) + var(--safe-bottom));
+}
+
+.contact h2 {
+  font-size: clamp(44px, 7vw, 76px);
+  line-height: 1.02;
+}
+
+.lead {
+  max-width: 30em;
+  margin: 14px 0 32px;
+  font-size: clamp(18px, 2vw, 20px);
+}
+
+/* The postcard is a physical object, so it keeps its own paper colors in both themes. */
+.postcard {
+  --pc-paper: #FBF9F2;
+  --pc-ink: #24271F;
+  --pc-soft: #6B6E63;
+  --pc-line: #D9D5C6;
+  --pc-stamp: #B4472F;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  max-width: 920px;
+  padding: 18px;
+  border-radius: 6px;
+  background: var(--pc-paper);
+  color: var(--pc-ink);
+  box-shadow: 0 1px 0 var(--pc-line), 0 18px 40px -24px rgba(20, 22, 18, .5);
+  color-scheme: light;
+}
+
+.postcard ::selection {
+  background: #F5C94A;
+  color: #24271F;
+}
+
+.postcard :focus-visible {
+  outline-color: var(--pc-ink);
+}
+
+.pc-write {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pc-title {
+  margin-bottom: 8px;
+  color: var(--pc-soft);
+  font: italic 400 22px/1.3 var(--serif);
+}
+
+/* Ruled lines are drawn with a background that scrolls along with the text. */
+.pc-message {
+  display: block;
+  width: 100%;
+  min-height: 216px;
+  flex: 1;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 35px, var(--pc-line) 35px 36px);
+  background-attachment: local;
+  color: var(--pc-ink);
+  font: 400 22px/36px var(--hand);
+  resize: vertical;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pc-message::placeholder,
+.pc-from::placeholder {
+  color: var(--pc-soft);
+  opacity: 1;
+}
+
+.pc-message:focus-visible,
+.pc-from:focus-visible {
+  outline: 2px solid var(--pc-ink);
+  outline-offset: 4px;
+  background-color: rgba(245, 201, 74, .12);
+}
+
+.pc-message[aria-invalid="true"] {
+  background-color: rgba(180, 71, 47, .08);
+}
+
+.pc-divider {
+  display: none;
+  background: var(--pc-line);
+}
+
+.pc-side {
+  display: flex;
+  flex-direction: column;
+  order: -1;
+  min-width: 0;
+}
+
+.pc-stamps {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  min-height: 124px;
+}
+
+.stamp {
+  position: relative;
+  z-index: 1;
+  width: 92px;
+  height: 110px;
+  flex: none;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .18));
+}
+
+.stamp-deva {
+  font-family: var(--deva);
+  font-weight: 500;
+}
+
+.stamp-latin {
+  font-family: var(--serif);
+  letter-spacing: .06em;
+}
+
+.stamp-mono {
+  font-family: var(--mono);
+  letter-spacing: .04em;
+}
+
+.postmark-text {
+  font-family: var(--mono);
+}
+
+.postmark {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: -6px;
+  width: 172px;
+  height: 103px;
+  color: var(--pc-stamp);
+  opacity: .82;
+  transform: rotate(-12deg);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.pc-address {
+  margin-top: 16px;
+}
+
+.pc-line {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 1px solid var(--pc-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--pc-ink);
+  font: 400 21px/44px var(--hand);
+  overflow-wrap: anywhere;
+}
+
+.pc-from-label {
+  display: block;
+  margin-top: 16px;
+  color: var(--pc-soft);
+  font: italic 400 15px/1.3 var(--serif);
+}
+
+.pc-from {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* The red "Posted" rubber stamp that lands on the card when it is sent. */
+.posted {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  padding: 6px 22px;
+  border: 5px double var(--pc-stamp);
+  border-radius: 10px;
+  color: var(--pc-stamp);
+  font: 500 clamp(36px, 7vw, 64px)/1 var(--serif);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.posted.is-on {
+  opacity: .85;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .posted.is-on {
+    animation: stamp-slam .3s cubic-bezier(.3, 1.4, .6, 1) both;
+  }
+}
+
+@keyframes stamp-slam {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-24deg) scale(1.7);
+  }
+  to {
+    opacity: .85;
+    transform: translate(-50%, -50%) rotate(-14deg) scale(1);
+  }
+}
+
+.send-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  max-width: 920px;
+  margin-top: 24px;
+}
+
+.pc-note {
+  color: var(--soft);
+  font-size: 15px;
+}
+
+.pc-note.is-error {
+  color: var(--error);
+}
+
+@media (min-width: 380px) {
+  .postcard {
+    padding: 22px;
+  }
+
+  .stamp {
+    width: 104px;
+    height: 124px;
+  }
+
+  .pc-stamps {
+    min-height: 136px;
+  }
+
+  .postmark {
+    top: 16px;
+    right: -6px;
+    width: 190px;
+    height: 114px;
+  }
+}
+
+@media (min-width: 760px) {
+  .postcard {
+    grid-template-columns: minmax(0, 1.35fr) 1px minmax(0, 1fr);
+    gap: clamp(20px, 3vw, 36px);
+    padding: clamp(22px, 3vw, 34px);
+    transform: rotate(-.6deg);
+  }
+
+  .pc-divider {
+    display: block;
+  }
+
+  .pc-side {
+    order: 0;
+  }
+
+  .pc-address {
+    margin-top: auto;
+    padding-top: 22px;
+  }
+
+  .pc-message {
+    min-height: 288px;
+  }
+}
+
+/* 14. Socials ----------------------------------------------------------- */
+
+.find-me {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  margin-top: 48px;
+}
+
+.find-me-label {
+  font-size: 20px;
+  transform: rotate(-1.5deg);
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+}
+
+.socials a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 17px;
+}
+
+/* 15. Shortcuts menu ---------------------------------------------------- */
+
+.palette {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  margin: max(12vh, calc(var(--safe-top) + 16px)) auto auto;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+.palette[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.palette::backdrop {
+  background: var(--backdrop);
+}
+
+.palette-search {
+  border-bottom: 1px solid var(--rule);
+}
+
+.palette-input {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: 16px 20px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 400 18px/1.3 var(--sans);
+  outline: none;
+}
+
+.palette-input::placeholder {
+  color: var(--soft);
+  opacity: 1;
+}
+
+.palette-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.palette-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.palette-option-hint {
+  flex: none;
+  max-width: 50%;
+  color: var(--soft);
+  font-size: 13px;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-option[aria-selected="true"] {
+  background: var(--paper);
+  box-shadow: inset 3px 0 0 var(--mark);
+}
+
+.palette-empty {
+  padding: 16px 22px;
+  color: var(--soft);
+}
+
+.palette-foot {
+  display: none;
+  gap: 18px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--rule);
+  color: var(--soft);
+  font-size: 13px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .palette-foot {
+    display: flex;
+  }
+}
+
+/* 16. Toast ------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + var(--safe-bottom));
+  z-index: 70;
+  max-width: calc(100vw - 32px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.toast:empty {
+  padding: 0;
+}
+
+.toast.is-shown {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* 17. No JavaScript fallbacks ------------------------------------------- */
+
+/* Without JavaScript, the hero shows the name large and the intro, nothing else. */
+.no-js .needs-js {
+  display: none !important;
+}
+
+.no-js .hero-id {
+  display: block;
+  margin-bottom: 0;
+}
+
+.no-js .hero-id h1 {
+  font: 500 clamp(44px, 7vw, 76px)/1.05 var(--serif);
+  letter-spacing: -.015em;
+  text-transform: none;
+}
+
+.no-js .hero-role {
+  margin-top: 10px;
+}
+
+.no-js .hero-role::before {
+  content: none;
+}
+
+/* 18. Reduced motion ---------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Majeed Mujawar",
+  "short_name": "Majeed",
+  "description": "Cloud and DevOps engineer in Mumbai.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#EEF0EB",
+  "theme_color": "#EEF0EB",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

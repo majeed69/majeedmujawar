@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://majeed69.github.io/majeedmujawar/sitemap.xml
